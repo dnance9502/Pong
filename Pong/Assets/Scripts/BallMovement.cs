@@ -5,6 +5,7 @@ using System.Security.Cryptography;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Experimental.Playables;
+using UnityEngine.Playables;
 using Random = UnityEngine.Random;
 
 public class BallMovement : MonoBehaviour
@@ -16,6 +17,10 @@ public class BallMovement : MonoBehaviour
     private Vector3 Initialdirection;
 
     private Vector3 LastVelocity;
+
+    public AudioClip hitsound;
+    private float lowVol = 0.5f;
+    private float highVol = 1f;
     
     void Start()
     {
@@ -25,7 +30,7 @@ public class BallMovement : MonoBehaviour
         KickOff(pStart, rb);
     }
 
-    private void Update()
+    private void FixedUpdate()
     {
         LastVelocity = rb.velocity;
 
@@ -37,64 +42,60 @@ public class BallMovement : MonoBehaviour
         if (player1)
         {
             ball.velocity = (Initialdirection * InitialSpeed);
-            
         }
         else
         {
             ball.velocity = (-Initialdirection * InitialSpeed);
-            
         }
     }
     
     
     private void OnCollisionEnter(Collision other)
     {
-        //Reflect direction and find current speed
+
         var speed = LastVelocity.magnitude;
         var direction = Vector3.Reflect(LastVelocity.normalized, other.contacts[0].normal);
+
+        float volume = Random.Range(lowVol, highVol) * (speed / 160);
+        GetComponent<AudioSource>().PlayOneShot(hitsound, volume);
         
-        //Change velocity of hit a wall
+
         if (other.gameObject.CompareTag("wall"))
         {
+            if (speed < 200f)
+            {
+                speed *= 1.1f;
+            }
+            
             rb.velocity = direction * speed;
+            GetComponent<ColorControl>().setColor(this.GameObject());
         }
-
-        //Change velocity if hit paddle #1
+        
+        
         if (other.gameObject.CompareTag("player1"))
         {
-            Debug.Log("contact with paddle");
             
-            //Max speed set
-            if (speed < 180f)
+            if (speed < 200f)
             {
                 speed *= 1.2f;
             }
             
             rb.velocity = direction * speed;
+            GetComponent<ColorControl>().setColor(this.GameObject());
             
-            //Update color
-            var color = GetComponent<Renderer>().material.color;
-            GetComponent<Renderer>().material.color = new Color(color.r, color.g * 0.9f, color.b);
-
         }
-        
-        //Change Velocity if hit paddle #2
+      
         if (other.gameObject.CompareTag("player2"))
         {
-            Debug.Log("contact with paddle");
             
-            //Max speed set
-            if (speed < 180f)
+            if (speed < 200f)
             {
                 speed *= 1.2f;
             }
     
             rb.velocity = direction * speed;
-            
-            //Update color
-            var color = GetComponent<Renderer>().material.color;
-            GetComponent<Renderer>().material.color = new Color(color.r, color.g * 0.9f, color.b);
-
+            GetComponent<ColorControl>().setColor(this.GameObject());
+       
         }
         
     }

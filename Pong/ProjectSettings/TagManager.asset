@@ -9,6 +9,11 @@ TagManager:
   - player2
   - wall
   - paddle
+  - button
+  - card
+  - floor
+  - goal1
+  - goal2
   layers:
   - Default
   - TransparentFX
